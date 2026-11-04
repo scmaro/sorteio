@@ -66,7 +66,7 @@ th{color:var(--mu);font-weight:600;font-size:13px}
 <section class="p on" id="part">
 <div class="box">
 <h2>Entrar no sorteio</h2>
-<div class="row"><input id="nome" placeholder="Seu nome" aria-label="Seu nome"></div>
+<div class="row"><input id="nome" placeholder="Nome completo" aria-label="Nome completo"></div>
 <p class="mu">Cota: R$ 10,00. Quem entra por link paga R$ 10,00 normalmente.</p>
 <button class="b" id="entrar">Gerar Pix da minha cota</button>
 <div id="msg" class="mu" role="status"></div>
@@ -119,7 +119,7 @@ const code=()=>Math.random().toString(36).slice(2,7).toUpperCase();
 const find=c=>S.people.find(p=>p.code===(c||"").trim().toUpperCase());
 // todos pagam R$ 10, sem desconto
 const due=p=>10;
-const link=p=>location.href.split("#")[0].split("?")[0]+"?ref="+p.code;
+const link=p=>location.href.split("#")[0].split("?")[0]+"?ref="+p.code+"&por="+encodeURIComponent(p.name);
 
 function confirmar(id){
   load();
@@ -136,14 +136,15 @@ function confirmar(id){
 $("entrar").onclick=()=>{
   const n=$("nome").value.trim();
   if(!n){$("msg").textContent="Digite seu nome para continuar.";return}
-  const r=find(REF)?REF:"";
+  const r=REF; // o código vem escondido no link; não precisa existir neste aparelho
+
   load();
-  const p={id:Date.now(),name:n,code:code(),ref:r||null,paid:false,paidValue:0,discount:false,referred:false,points:0,qualified:false};
+  const p={id:Date.now(),name:n,code:code(),ref:r||null,refName:r?REFNAME:"",paid:false,paidValue:0,discount:false,referred:false,points:0,qualified:false};
   S.people.push(p);save();
   $("msg").innerHTML="";$("nome").value="";
   CUR=p.id;render();abre();
 };
-let CUR=null,REF="";
+let CUR=null,REF="",REFNAME="";
 const modal=$("modal");
 function abre(){minha();if(!modal.open)modal.showModal()}
 $("fecha").onclick=()=>modal.close();
@@ -161,21 +162,20 @@ function fakeQR(seed){
 function qrHtml(p){
   return '<div class="qr">'+(QR_IMG?'<img src="'+QR_IMG+'" alt="QR Code Pix" width="190" height="190">':fakeQR(p.code))+'<span class="mu">'+(QR_IMG?'Aponte a câmera do app do seu banco':'QR Code de exemplo (será trocado pelo oficial)')+'</span></div>';
 }
+function msgAdmin(p){
+  return "COMPROVANTE DO SORTEIO\nNome: "+p.name+"\nCódigo: "+p.code+"\nValor: "+brl(due(p))+(p.ref?"\nIndicado por: "+(p.refName||"sem nome")+" ("+p.ref+")":"\nIndicado por: ninguém")+"\n(comprovante do Pix anexado)";
+}
 function minha(){
   const p=S.people.find(x=>x.id===CUR),el=$("minha");
   if(!p){el.innerHTML="";return}
-  let h='<p><b>'+esc(p.name)+'</b> · código <b>'+p.code+'</b></p>';
+  let h='<p><b>'+esc(p.name)+'</b></p>';
   if(!p.paid){
-    h+='<p>Valor da sua cota agora: <b>'+brl(due(p))+'</b></p>'+qrHtml(p)+'<p class="note">Depois de pagar, <b>envie o comprovante</b> para os administradores. Sua cota só é validada no sorteio depois que o comprovante for conferido.</p><a class="b wa" target="_blank" rel="noopener" href="https://wa.me/'+WHATS_ADMIN+'?text='+encodeURIComponent("Olá! Segue o comprovante do Pix da minha cota do sorteio. Nome: "+p.name+" · Código: "+p.code+" · Valor: "+brl(due(p)))+'">Enviar comprovante pelo WhatsApp</a><button class="b s" style="margin-top:10px" onclick="confirmar('+p.id+')">Simular pagamento confirmado</button>';
+    h+='<p>Valor da sua cota: <b>'+brl(due(p))+'</b></p>'+qrHtml(p)+'<p class="note">Depois de pagar, <b>envie o comprovante</b> para os administradores. Sua cota só é validada no sorteio depois que o comprovante for conferido.</p><a class="b wa" target="_blank" rel="noopener" href="https://wa.me/'+WHATS_ADMIN+'?text='+encodeURIComponent(msgAdmin(p))+'">Enviar comprovante pelo WhatsApp</a><button class="b s" style="margin-top:10px" onclick="confirmar('+p.id+')">Simular pagamento confirmado</button>';
   }else{
     h+='<p><span class="tag ok">Pagamento confirmado</span> '+brl(p.paidValue)+'</p>';
-    h+=p.referred?'<p class="mu">Sua indicação pagou: você ganhou 2 pontos.</p>':'<p class="mu">Indique 1 pessoa pelo link: quando ela pagar os R$ 10,00, você ganha 2 pontos. Ao chegar a 10 pontos, você concorre ao prêmio dos contemplados.</p>';
-    h+='<a class="b wa" id="wa" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent("Participe do sorteio do relógio digital! Cota de R$ 10,00. Entre pelo meu link: "+link(p))+'">Compartilhar link de indicação no WhatsApp</a>';
   }
-  h+='<p style="margin-top:12px">Pontos: <b>'+p.points+'</b> de 10</p><div class="bar"><i style="width:'+Math.min(100,p.points*10)+'%"></i></div>';
-  if(p.qualified)h+='<p><span class="tag q">Qualificado para o sorteio dos contemplados</span></p>';
+  h+='<hr style="border:0;border-top:1px solid var(--ln);margin:14px 0"><p class="mu">Indique 1 pessoa pelo seu link: quando ela pagar os R$ 10,00, você ganha 2 pontos. Ao chegar a 10 pontos, você concorre ao prêmio dos contemplados. Os administradores avisam seus pontos.</p><a class="b wa" id="wa" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent("Participe do sorteio do relógio digital! Cota de R$ 10,00. Entre pelo meu link: "+link(p))+'">Compartilhar link de indicação no WhatsApp</a>';
   el.innerHTML=h;
-  const cp=$("cp");if(cp)cp.onclick=()=>{try{navigator.clipboard.writeText(link(p))}catch(e){}cp.textContent="Copiado"};
 }
 
 function render(){
@@ -193,7 +193,7 @@ window.addEventListener("storage",e=>{if(e.key===KEY){load();render()}});
 function show(t){document.querySelectorAll("section.p").forEach(s=>s.classList.toggle("on",s.id===t));document.querySelectorAll("nav button[data-t]").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t))}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>b.dataset.d?$(b.dataset.d).showModal():show(b.dataset.t));
 document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>b.closest("dialog").close());
-try{const r=new URLSearchParams(location.search).get("ref");if(r)REF=r.trim().toUpperCase()}catch(e){}
+try{const r=new URLSearchParams(location.search).get("ref");if(r){REF=r.trim().toUpperCase();REFNAME=(new URLSearchParams(location.search).get("por")||"").trim().slice(0,80)}}catch(e){}
 render();
 </script>
 </body>
