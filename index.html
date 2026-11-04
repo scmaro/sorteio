@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sorteio do Relógio Digital</title>
+<style>
+:root{--bg:#f6f3ee;--sf:#fffdf9;--tx:#1d2330;--mu:#667085;--ln:#ddd6ca;--ac:#1f6f5c;--ac2:#e0a526;--bad:#b3392f;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181f;--sf:#1c222c;--tx:#eef0f3;--mu:#9aa3b2;--ln:#2d3544;--ac:#4fc3a1;--ac2:#f0bb45;--bad:#ef7b70;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14181f;--sf:#1c222c;--tx:#eef0f3;--mu:#9aa3b2;--ln:#2d3544;--ac:#4fc3a1;--ac2:#f0bb45;--bad:#ef7b70;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font:700 clamp(28px,6vw,44px)/1.1 Georgia,"Times New Roman",serif;margin:8px 0 4px}
+h2{font:700 20px/1.2 Georgia,serif;margin:0 0 10px}
+p.sub{color:var(--mu);margin:0 0 18px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+nav button{border:1px solid var(--ln);background:var(--sf);color:var(--tx);padding:9px 14px;border-radius:999px;font:inherit;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ac);color:#fff;border-color:var(--ac)}
+dialog{border:1px solid var(--ln);border-radius:14px;background:var(--sf);color:var(--tx);padding:18px;width:min(440px,92vw)}
+dialog.big{width:min(640px,94vw);max-height:88vh;overflow:auto}
+dialog.big .box{border:0;padding:0;background:transparent}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.mh h2{margin:0}
+section.p{display:none}section.p.on{display:block}
+.box{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input{font:inherit;padding:10px 12px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--tx);flex:1;min-width:160px}
+button.b{font:inherit;border:0;border-radius:8px;padding:10px 16px;background:var(--ac);color:#fff;cursor:pointer;font-weight:600}
+button.b.s{background:transparent;color:var(--ac);border:1px solid var(--ac);padding:6px 10px;font-size:14px}
+dialog .qr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+dialog .qr svg,dialog .qr img{border:1px solid var(--ln);border-radius:8px;background:#fff}
+a.b.wa{display:block;text-align:center;text-decoration:none;margin-top:10px;padding:12px 16px;background:#1e8e4e}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.stats div{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px 12px}
+.stats b{display:block;font-size:22px}.stats span{color:var(--mu);font-size:13px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--ln);white-space:nowrap}
+th{color:var(--mu);font-weight:600;font-size:13px}
+.tag{padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--ln)}
+.tag.ok{background:var(--ac);color:#fff;border-color:var(--ac)}.tag.q{background:var(--ac2);color:#222;border-color:var(--ac2)}
+.pix{font:13px/1.4 ui-monospace,monospace;word-break:break-all;background:var(--bg);border:1px dashed var(--ln);padding:10px;border-radius:8px;margin:8px 0}
+.bar{height:10px;background:var(--ln);border-radius:9px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--ac2)}
+.rules li{margin:4px 0}.mu{color:var(--mu);font-size:14px}
+.win{font:700 clamp(30px,8vw,56px)/1.1 Georgia,serif;text-align:center;padding:30px 10px;min-height:120px;word-break:break-word}
+.win.done{color:var(--ac)}
+.note{border-left:4px solid var(--ac2);padding:6px 12px;background:var(--bg);margin:10px 0;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.win.done{animation:pop .5s}@keyframes pop{from{transform:scale(.8);opacity:0}}}
+</style>
+</head>
+<body>
+<main>
+<h1>Sorteio do relógio digital</h1>
+<p class="sub">Protótipo para visualizar as regras fechadas. O Pix aqui é simulado: o botão “Confirmar Pix” representa o aviso automático do provedor de pagamento.</p>
+<nav role="tablist">
+<button role="tab" data-t="part" aria-selected="true">Participar</button>
+<button data-d="dlive">Sorteio ao vivo</button>
+<button data-d="dreg">Regras</button>
+</nav>
+
+<section class="p on" id="part">
+<div class="box">
+<h2>Entrar no sorteio</h2>
+<div class="row"><input id="nome" placeholder="Seu nome" aria-label="Seu nome"></div>
+<p class="mu">Cota: R$ 10,00. Quem entra por link paga R$ 10,00 normalmente.</p>
+<button class="b" id="entrar">Gerar Pix da minha cota</button>
+<div id="msg" class="mu" role="status"></div>
+</div>
+</section>
+
+<dialog id="modal" aria-labelledby="mt">
+<div class="mh"><h2 id="mt">Pagamento da cota</h2><button class="b s" id="fecha" aria-label="Fechar">Fechar</button></div>
+<div id="minha"></div>
+</dialog>
+
+
+
+<dialog id="dlive" class="big" aria-label="Sorteio ao vivo"><div class="mh"><h2>Sorteio ao vivo</h2><button class="b s" data-x aria-label="Fechar">Fechar</button></div>
+<div class="box"><h2>Sorteio principal</h2>
+<p class="mu" id="infoP"></p>
+<div class="win" id="winP">Aguardando</div>
+</div>
+<div class="box"><h2>Sorteio dos contemplados</h2>
+<p class="mu" id="infoC"></p>
+<div class="win" id="winC">Aguardando</div>
+</div>
+</dialog>
+
+<dialog id="dreg" class="big" aria-label="Regras"><div class="mh"><h2>Regras</h2><button class="b s" data-x aria-label="Fechar">Fechar</button></div>
+<div class="box rules"><h2>Regras fechadas</h2>
+<ul>
+<li><b>Prêmio principal:</b> relógio de parede digital.</li>
+<li><b>Cota:</b> R$ 10,00 para todos, inclusive quem entra por link.</li>
+<li><b>Indicação:</b> cada participante indica 1 pessoa por sorteio, por link. O indicado paga os R$ 10,00 sem desconto, e o indicador ganha 2 pontos quando essa indicação pagar.</li>
+<li>Quem entra pelo link paga R$ 10,00 e também pode indicar outra pessoa.</li>
+<li><b>Pontos:</b> acumulam entre sorteios e não podem ser sacados. Ao chegar a 10 pontos, a pessoa concorre ao prêmio do sorteio dos contemplados e os pontos zeram.</li>
+<li><b>Sorteio dos contemplados:</b> prêmio separado, ainda a definir, divulgado pelos administradores.</li>
+<li><b>Datas e mínimo de cotas:</b> anunciados pelos administradores.</li>
+<li><b>Ganhador:</b> definido ao vivo, de forma aleatória, pelo próprio script.</li>
+<li><b>Pagamento:</b> Pix com confirmação automática (provedor ainda a escolher).</li>
+</ul></div>
+</dialog>
+</main>
+
+<script>
+const KEY="sorteio_v1";
+let S={cfg:{dataP:"",dataC:"",min:0,premioC:""},people:[],winP:null,winC:null};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=i=>document.getElementById(i);
+const brl=n=>"R$ "+n.toFixed(2).replace(".",",");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const code=()=>Math.random().toString(36).slice(2,7).toUpperCase();
+const find=c=>S.people.find(p=>p.code===(c||"").trim().toUpperCase());
+// todos pagam R$ 10, sem desconto
+const due=p=>10;
+const link=p=>location.href.split("#")[0].split("?")[0]+"?ref="+p.code;
+
+function confirmar(id){
+  load();
+  const p=S.people.find(x=>x.id===id);if(!p||p.paid)return;
+  p.paid=true;p.paidValue=due(p);
+  const ind=p.ref&&find(p.ref);
+  if(ind&&!ind.referred){ // 1 indicação por sorteio
+    ind.referred=true;ind.points+=2;
+    if(ind.points>=10){ind.qualified=true;ind.points=0}
+  }
+  save();render();if(modal.open)minha();
+}
+
+$("entrar").onclick=()=>{
+  const n=$("nome").value.trim();
+  if(!n){$("msg").textContent="Digite seu nome para continuar.";return}
+  const r=find(REF)?REF:"";
+  load();
+  const p={id:Date.now(),name:n,code:code(),ref:r||null,paid:false,paidValue:0,discount:false,referred:false,points:0,qualified:false};
+  S.people.push(p);save();
+  $("msg").innerHTML="";$("nome").value="";
+  CUR=p.id;render();abre();
+};
+let CUR=null,REF="";
+const modal=$("modal");
+function abre(){minha();if(!modal.open)modal.showModal()}
+$("fecha").onclick=()=>modal.close();
+
+// Troque pelo seu QR Code Pix: coloque o endereço da imagem em QR_IMG (ex.: "meu-qr.png") e o seu número do WhatsApp em WHATS_ADMIN (ex.: "5584999999999")
+const QR_IMG="",WHATS_ADMIN="";
+function fakeQR(seed){
+  const n=25,m=[];let x=0;for(const c of seed)x=(x*31+c.charCodeAt(0))>>>0;
+  const rnd=()=>(x=(x*1664525+1013904223)>>>0)/4294967296;
+  const fin=(r,c)=>{for(const[o,q]of[[0,0],[0,n-7],[n-7,0]]){const i=r-o,j=c-q;if(i>=0&&i<7&&j>=0&&j<7)return i==0||i==6||j==0||j==6||(i>1&&i<5&&j>1&&j<5)?1:0}
+    return (r<8&&(c<8||c>=n-8))||(r>=n-8&&c<8)?0:null};
+  let d="";for(let r=0;r<n;r++)for(let c=0;c<n;c++){const f=fin(r,c);const v=f===null?rnd()>.5:f;if(v)d+="M"+c+" "+r+"h1v1h-1z"}
+  return '<svg viewBox="-2 -2 '+(n+4)+' '+(n+4)+'" width="190" height="190" role="img" aria-label="QR Code Pix de exemplo"><rect x="-2" y="-2" width="'+(n+4)+'" height="'+(n+4)+'" fill="#fff"/><path d="'+d+'" fill="#111"/></svg>';
+}
+function qrHtml(p){
+  return '<div class="qr">'+(QR_IMG?'<img src="'+QR_IMG+'" alt="QR Code Pix" width="190" height="190">':fakeQR(p.code))+'<span class="mu">'+(QR_IMG?'Aponte a câmera do app do seu banco':'QR Code de exemplo (será trocado pelo oficial)')+'</span></div>';
+}
+function minha(){
+  const p=S.people.find(x=>x.id===CUR),el=$("minha");
+  if(!p){el.innerHTML="";return}
+  let h='<p><b>'+esc(p.name)+'</b> · código <b>'+p.code+'</b></p>';
+  if(!p.paid){
+    h+='<p>Valor da sua cota agora: <b>'+brl(due(p))+'</b></p>'+qrHtml(p)+'<p class="note">Depois de pagar, <b>envie o comprovante</b> para os administradores. Sua cota só é validada no sorteio depois que o comprovante for conferido.</p><a class="b wa" target="_blank" rel="noopener" href="https://wa.me/'+WHATS_ADMIN+'?text='+encodeURIComponent("Olá! Segue o comprovante do Pix da minha cota do sorteio. Nome: "+p.name+" · Código: "+p.code+" · Valor: "+brl(due(p)))+'">Enviar comprovante pelo WhatsApp</a><button class="b s" style="margin-top:10px" onclick="confirmar('+p.id+')">Simular pagamento confirmado</button>';
+  }else{
+    h+='<p><span class="tag ok">Pagamento confirmado</span> '+brl(p.paidValue)+'</p>';
+    h+=p.referred?'<p class="mu">Sua indicação pagou: você ganhou 2 pontos.</p>':'<p class="mu">Indique 1 pessoa pelo link: quando ela pagar os R$ 10,00, você ganha 2 pontos. Ao chegar a 10 pontos, você concorre ao prêmio dos contemplados.</p>';
+    h+='<a class="b wa" id="wa" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent("Participe do sorteio do relógio digital! Cota de R$ 10,00. Entre pelo meu link: "+link(p))+'">Compartilhar link de indicação no WhatsApp</a>';
+  }
+  h+='<p style="margin-top:12px">Pontos: <b>'+p.points+'</b> de 10</p><div class="bar"><i style="width:'+Math.min(100,p.points*10)+'%"></i></div>';
+  if(p.qualified)h+='<p><span class="tag q">Qualificado para o sorteio dos contemplados</span></p>';
+  el.innerHTML=h;
+  const cp=$("cp");if(cp)cp.onclick=()=>{try{navigator.clipboard.writeText(link(p))}catch(e){}cp.textContent="Copiado"};
+}
+
+function render(){
+  const pagos=S.people.filter(p=>p.paid),qual=S.people.filter(p=>p.qualified);
+  const min=+S.cfg.min||0;
+  $("infoP").textContent="Data: "+(S.cfg.dataP||"a divulgar")+" · Cotas pagas: "+pagos.length+(min?" de "+min+" no mínimo":"");
+  $("infoC").textContent="Data: "+(S.cfg.dataC||"a divulgar")+" · Prêmio: "+(S.cfg.premioC||"a definir")+" · Qualificados: "+qual.length;
+  for(const[k,id]of[["winP","winP"],["winC","winC"]]){const w=$(id);w.textContent=S[k]||"Aguardando";w.classList.toggle("done",!!S[k])}
+  minha();
+}
+// Os dados ficam compartilhados com o arquivo painel.html (mesma chave no navegador)
+function load(){try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}}
+window.addEventListener("storage",e=>{if(e.key===KEY){load();render()}});
+
+function show(t){document.querySelectorAll("section.p").forEach(s=>s.classList.toggle("on",s.id===t));document.querySelectorAll("nav button[data-t]").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t))}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>b.dataset.d?$(b.dataset.d).showModal():show(b.dataset.t));
+document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>b.closest("dialog").close());
+try{const r=new URLSearchParams(location.search).get("ref");if(r)REF=r.trim().toUpperCase()}catch(e){}
+render();
+</script>
+</body>
+</html>
